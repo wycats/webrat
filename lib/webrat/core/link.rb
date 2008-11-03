@@ -28,7 +28,7 @@ module Webrat
     end
     
     def text
-      @element.innerHTML
+      @element.inner_html
     end
     
   protected

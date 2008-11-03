@@ -1,4 +1,9 @@
-require "hpricot"
+require "nokogiri"
+
+class Nokogiri::XML::Node
+  alias :inner_html :content
+end
+
 require "webrat/core/form"
 require "webrat/core/assertions"
 
@@ -163,7 +168,7 @@ module Webrat
     alias_method :click_button, :clicks_button
     
     def dom # :nodoc:
-      @dom ||= Hpricot(scoped_html)
+      @dom ||= Nokogiri::Hpricot(scoped_html)
     end
     
     def field_labeled(label)
@@ -175,7 +180,7 @@ module Webrat
     def scoped_html
       @scoped_html ||= begin
         if @selector
-          (Hpricot(@html) / @selector).first.to_html
+          (Nokogiri::Hpricot(@html) / @selector).first.to_html
         else
           @html
         end
@@ -218,7 +223,7 @@ module Webrat
       matching_links = links_within(selector).select do |possible_link|
         possible_link.matches_text?(text)
       end
-      
+
       if matching_links.any?
         matching_links.min { |a, b| a.text.length <=> b.text.length }
       else
@@ -236,7 +241,8 @@ module Webrat
     end
     
     def links_within(selector)
-      (dom / selector / "a[@href]").map do |link_element|
+      cont = selector ? (dom / selector) : dom
+      (cont / "a[@href]").map do |link_element|
         Link.new(@session, link_element)
       end
     end

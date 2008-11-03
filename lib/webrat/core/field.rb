@@ -94,7 +94,7 @@ module Webrat
       @label_elements = []
 
       parent = @element.parent
-      while parent.respond_to?(:parent)
+      while (parent.name rescue nil)
         if parent.name == 'label'
           @label_elements.push parent
           break
@@ -103,7 +103,7 @@ module Webrat
       end
 
       unless id.blank?
-        @label_elements += @form.element / "label[@for=#{id}]"
+        @label_elements += (@form.element / "label[@for=#{id}]").to_a
       end
 
       @label_elements
@@ -143,7 +143,7 @@ module Webrat
   class ButtonField < Field
 
     def matches_text?(text)
-      @element.innerHTML =~ /#{Regexp.escape(text.to_s)}/i
+      @element.inner_html =~ /#{Regexp.escape(text.to_s)}/i
     end
     
     def matches_value?(value)
@@ -314,10 +314,10 @@ module Webrat
 
     def default_value
       selected_options = @element / "option[@selected='selected']"
-      selected_options = @element / "option:first" if selected_options.empty? 
+      selected_options = @element / "option:first" if selected_options.size == 0
       selected_options.map do |option|
         return "" if option.nil?
-        option["value"] || option.innerHTML
+        option["value"] || option.inner_html
       end
     end
 
